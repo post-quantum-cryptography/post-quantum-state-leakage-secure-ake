@@ -1,0 +1,23 @@
+# Text editors and IDES
+.idea
+tags
+*.swp
+*~
+.tags*
+
+# CMake
+/build*
+
+# MSVC
+.vs
+/out*
+
+# CLion
+/cmake-build*
+
+# Misc
+__pycache__
+.pytest_cache
+.cache
+.CMake/a.out
+
