@@ -9,7 +9,7 @@ Project uses ``open-quantum-safe``, ``LibTomCrypt`` as cryptographic primitives 
 
 * Checkout:
 ```
-git clone git@github.com:post-quantum-cryptography/post-quantum-state-leakage-secure-ake.git
+tar xvvf post-quantum-state-leakage-secure-ake.tar.gz
 cd post-quantum-state-leakage-secure-ake
 git submodule init
 git submodule update
