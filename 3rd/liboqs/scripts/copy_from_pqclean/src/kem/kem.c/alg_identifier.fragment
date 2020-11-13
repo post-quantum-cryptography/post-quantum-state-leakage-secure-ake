@@ -1,3 +1,0 @@
-{% for family in instructions['kems'] %}{% for scheme in family['schemes'] %}
-		OQS_KEM_alg_{{ family['name'] }}_{{ scheme['scheme'] }},{% endfor %}{% endfor %}
-		
