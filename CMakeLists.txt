@@ -13,8 +13,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address,leak,un
 set(LDFLAGS_DEBUG "${LDFLAGS_DEBUG} -fsanitize=address,leak,undefined")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(LIBTOMCRYPT_ROOT ${PROJECT_SOURCE_DIR}/3rd/libtomcrypt)
-set(LIBOQS_ROOT ${PROJECT_SOURCE_DIR}/3rd/liboqs/)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/3rd/liboqs/src)
+set(PQC_ROOT ${PROJECT_SOURCE_DIR}/3rd/pqc/)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/3rd/libpqc/src)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include(ExternalProject)
@@ -36,15 +36,14 @@ ExternalProject_Add(LibTomCrypt
 	BUILD_COMMAND CFLAGS=-g ${MAKE_PROGRAM} -C <BINARY_DIR>/libtomcrypt
 	INSTALL_COMMAND "")
 
-ExternalProject_Add(LibOQS
-    SOURCE_DIR ${LIBOQS_ROOT}
-    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/liboqs-build
-	INSTALL_COMMAND ""
-	CMAKE_CACHE_ARGS -DOQS_USE_OPENSSL:BOOL=ON -DOQS_USE_CPU_EXTENSIONS:BOOL=OFF -DOQS_PORTABLE_BUILD:BOOL=OFF -DOQS_BUILD_ONLY_LIB:BOOL=ON)
+ExternalProject_Add(LibPQC
+    SOURCE_DIR ${PQC_ROOT}
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libpqc-build
+	INSTALL_COMMAND "")
 
 include_directories(
 	${LIBTOMCRYPT_ROOT}/src/headers
-	${CMAKE_CURRENT_BINARY_DIR}/liboqs-build/include)
+	${PQC_ROOT}/public)
 
 # SNEIK library
 add_library(
@@ -60,12 +59,13 @@ add_executable(
 add_dependencies(
 	sneik
 	LibTomCrypt
-	LibOQS)
+	LibPQC)
 
 target_link_libraries(
 	sneik
 	${CMAKE_CURRENT_BINARY_DIR}/libtomcrypt-build/libtomcrypt/libtomcrypt.a
-	${CMAKE_CURRENT_BINARY_DIR}/liboqs-build/lib/liboqs.a
+	${CMAKE_CURRENT_BINARY_DIR}/libpqc-build/libpqc_s.a
+	${CMAKE_CURRENT_BINARY_DIR}/libpqc-build/3rd/cpu_features/libcpu_features.a
 	OpenSSL::Crypto)
 
 target_link_libraries(
@@ -81,7 +81,7 @@ add_dependencies(
 	sneik_bench
 	sneik
 	LibTomCrypt
-	LibOQS)
+	LibPQC)
 
 target_link_libraries(
 	sneik_bench

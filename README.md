@@ -5,14 +5,14 @@ Repository provides a full-fledged, generic C implementation of our (weakly deni
 
 ## Building
 
-Project uses ``open-quantum-safe``, ``LibTomCrypt`` as cryptographic primitives providers. We also use branch of ``google-benchmark`` for benchmarking. Those libraries are added as git submodules. On Linux platform code can be built in following way:
+Project uses [PQ Crypto Catalog](https://github.com/henrydcase/pqc), [LibTomCrypt](https://github.com/libtom/libtomcrypt) as cryptographic primitives providers. We also use branch of ``google-benchmark`` for benchmarking. Those libraries are added as git submodules. On Linux platform code can be built in following way:
 
 * Checkout:
 ```
 tar xvvf post-quantum-state-leakage-secure-ake.tar.gz
 cd post-quantum-state-leakage-secure-ake
 git submodule init
-git submodule update
+git submodule update --init --recursive
 ```
 
 * Build:
