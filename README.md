@@ -12,7 +12,7 @@ Project uses ``open-quantum-safe``, ``LibTomCrypt`` as cryptographic primitives 
 tar xvvf post-quantum-state-leakage-secure-ake.tar.gz
 cd post-quantum-state-leakage-secure-ake
 git submodule init
-git submodule update
+git submodule update --init --recursive
 ```
 
 * Build:

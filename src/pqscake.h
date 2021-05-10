@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <oqs/sig.h>
-#include <oqs/kem.h>
+#include <pqc/pqc.h>
 #include "utils.h"
 
 #ifdef __cplusplus
@@ -17,8 +16,8 @@ extern "C" {
 // Parameters of the KEM and signature scheme
 typedef struct params_t {
 	const char* alg_name;
-	const char* sig_id;
-	const char* kem_id;
+	const uint8_t sig_id;
+	const uint8_t kem_id;
 
 	size_t sig_pub_sz;
 	size_t sig_prv_sz;
@@ -31,6 +30,8 @@ typedef struct params_t {
 
 	size_t sid_pfx_sz;
 	size_t sid_sz;
+
+	uint8_t nist_level;
 } params_t;
 
 // Kem keypair
@@ -68,8 +69,8 @@ typedef struct workspace_t {
 // Communication context
 typedef struct comm_ctx_t {
 	const params_t *params;
-	OQS_SIG *sig_ctx;
-	OQS_KEM *kem_ctx;
+	const pqc_ctx_t *sig_ctx;
+	const pqc_ctx_t *kem_ctx;
 	uint8_t seed[SEED_SZ];
 
 	struct {
