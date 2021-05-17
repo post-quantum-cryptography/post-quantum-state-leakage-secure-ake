@@ -1,9 +1,9 @@
 [submodule "3rd/libtomcrypt"]
 	path = 3rd/libtomcrypt
-	url = git@github.com:libtom/libtomcrypt.git
+	url = https://github.com/libtom/libtomcrypt.git
 [submodule "3rd/benchmark"]
 	path = 3rd/benchmark
-	url = git@github.com:henrydcase/benchmark.git
+	url = https://github.com/kriskwiatkowski/benchmark.git
 [submodule "3rd/pqc"]
 	path = 3rd/pqc
-	url = https://github.com/henrydcase/pqc.git
+	url = https://github.com/kriskwiatkowski/pqc.git
