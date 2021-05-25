@@ -7,8 +7,8 @@
 #define REG_ALG(sig, kem, lvl)                  \
 {                                               \
     .alg_name = STR(GLUE(sig, GLUE(_, kem))),   \
-    .sig_id = sig,                              \
-    .kem_id = kem,                              \
+    .sig_id = GLUE(PQC_ALG_SIG_,sig),           \
+    .kem_id = GLUE(PQC_ALG_KEM_,kem),           \
     .nist_level = lvl                           \
 }
 
