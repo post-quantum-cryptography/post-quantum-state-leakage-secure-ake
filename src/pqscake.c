@@ -422,7 +422,7 @@ void clean_session(comm_ctx_t *c) {
 }
 
 size_t get_received_init_data_len(const comm_ctx_t *c) {
-    return (2*c->params->kem_pub_sz) + c->params->sig_pub_sz;
+    return c->params->kem_pub_sz + c->params->sig_pub_sz;
 }
 
 size_t get_session_sent_data_len(const comm_ctx_t *c) {

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(sneik NONE)
+include(FetchContent)
 
 enable_language(C)
 enable_language(CXX)
@@ -7,6 +8,30 @@ enable_language(CXX)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+
+FetchContent_Declare(
+  benchmark
+  SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/benchmark
+  GIT_REPOSITORY https://github.com/kriskwiatkowski/benchmark.git
+  GIT_TAG        e45fcc64e02489f718df499a162b41f742a1b7e5
+)
+FetchContent_Populate(benchmark)
+
+FetchContent_Declare(
+  libtomcrypt
+  SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/libtomcrypt
+  GIT_REPOSITORY https://github.com/libtom/libtomcrypt.git
+  GIT_TAG        cfbd7f8d364e1438555ff2a247f7e17add11840e
+)
+FetchContent_Populate(libtomcrypt)
+
+FetchContent_Declare(
+  pqc
+  SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/pqc
+  GIT_REPOSITORY https://github.com/kriskwiatkowski/pqc.git
+  GIT_TAG        f3aa725c4c237ca6955b1ffcec47807fb3fa32f0
+)
+FetchContent_Populate(pqc)
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address,leak,undefined -Wall -Werror -Wpedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address,leak,undefined -Wall -Werror -Wpedantic")

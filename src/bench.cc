@@ -29,12 +29,12 @@ void BenchScheme(benchmark::State &st) {
 
         if(!label_st) {
             ost << "\tData transer: ["
-                << "init: " << get_received_init_data_len(&session)
-                << "\tsent: " << get_session_sent_data_len(&session)
-                << "\treceived: " << get_session_received_data_len(&session)
+                << "lpk: " << get_received_init_data_len(&session)
+                << "\tek_t: " << get_session_sent_data_len(&session)
+                << "\tC,C_T,c: " << get_session_received_data_len(&session)
                 << "\ttotal: " << get_session_sent_data_len(&session) +
                 get_session_received_data_len(&session) +
-                get_received_init_data_len(&session) << "],"
+                (2*get_received_init_data_len(&session)) << "],"
                 << "\tNIST-LVL: " << get_scheme_sec(&session);
             st.SetLabel(ost.str());
             label_st = true;
