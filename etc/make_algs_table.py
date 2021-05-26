@@ -8,6 +8,8 @@ l1_kem = {
 	"HQCRMRS128",
 	"KYBER512",
 	"NTRUHPS2048509",
+	"MCELIECE348864",
+	#"MCELIECE348864F"
 }
 
 # Signatures with NIST security level 1
@@ -31,6 +33,8 @@ l3_kem = {
 	"KYBER768",
 	"NTRUHPS2048677",
 	"NTRUHRSS701",
+	"MCELIECE460896",
+	#"MCELIECE460896F"
 }
 
 # Signatures with NIST security level 3
@@ -51,6 +55,12 @@ l5_kem = {
 	"HQCRMRS256",
 	"KYBER1024",
 	"NTRUHPS4096821",
+	"MCELIECE6688128",
+	#"MCELIECE6688128F",
+	#"MCELIECE6960119",
+	#"MCELIECE6960119F",
+	#"MCELIECE8192128",
+	#"MCELIECE8192128F"
 }
 
 # Signatures with NIST security level 5
