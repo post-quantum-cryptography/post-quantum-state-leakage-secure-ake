@@ -29,7 +29,7 @@ FetchContent_Declare(
   pqc
   SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/pqc
   GIT_REPOSITORY https://github.com/kriskwiatkowski/pqc.git
-  GIT_TAG        20782127e81da33d2ddc37564248ec5b8a83159b
+  GIT_TAG        944543c9b9d00586c7e739b39f3cbebc7cc3ddc1
 )
 FetchContent_Populate(pqc)
 
