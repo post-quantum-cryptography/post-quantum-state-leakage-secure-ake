@@ -13,7 +13,7 @@ authors:
   - family-names: Prest
     given-names: Thomas
     orcid:  https://orcid.org/0000-0003-1445-6212
-
-title: An Efficient and Generic Construction for Signal’s Handshake (X3DH): Post-Quantum, State Leakage Secure, and Deniable
+title: "An Efficient and Generic Construction for Signal’s Handshake (X3DH): Post-Quantum, State Leakage Secure, and Deniable"
 version: v1.0.1
 date-released: 2017-12-18
+url: "https://github.com/post-quantum-cryptography/post-quantum-state-leakage-secure-ake"
