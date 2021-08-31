@@ -1,0 +1,19 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Kris
+    given-names: Kwiatkowski
+    orcid: https://orcid.org/0000-0003-2363-317X
+  - family-names: Hashimoto
+    given-names: Keitaro
+    orcid:  https://orcid.org/0000-0002-2232-9443
+  - family-names: Katsumata
+    given-names: Shuichi
+    orcid:  https://orcid.org/0000-0002-8496-0476 
+  - family-names: Prest
+    given-names: Thomas
+    orcid:  https://orcid.org/0000-0003-1445-6212
+
+title: An Efficient and Generic Construction for Signal’s Handshake (X3DH): Post-Quantum, State Leakage Secure, and Deniable
+version: v1.0.1
+date-released: 2017-12-18
