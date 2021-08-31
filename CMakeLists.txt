@@ -4,6 +4,7 @@ include(FetchContent)
 
 enable_language(C)
 enable_language(CXX)
+set (CMAKE_CXX_STANDARD 11)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -13,7 +14,7 @@ FetchContent_Declare(
   benchmark
   SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/benchmark
   GIT_REPOSITORY https://github.com/kriskwiatkowski/benchmark.git
-  GIT_TAG        e45fcc64e02489f718df499a162b41f742a1b7e5
+  GIT_TAG        49862ab56b6b7c3afd87b80bd5d787ed78ce3b96
 )
 FetchContent_Populate(benchmark)
 
