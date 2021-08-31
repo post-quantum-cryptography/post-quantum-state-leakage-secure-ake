@@ -1,7 +1,7 @@
 # Signal Conforming AKE protocol
 
 ## Description
-Repository provides a full-fledged, generic C implementation of our (weakly deniable) protocol. Implementation instantiates a protocol with several Round 3 candidates (finalists and alternates) to the NIST post-quantum standardization process. Benchmarking tool can be use to compare the resulting bandwidth and computation costs.
+Repository provides a full-fledged, generic C implementation of work described in a paper ("An Efficient and Generic Construction for Signal’s Handshake (X3DH): Post-Quantum, State Leakage Secure, and Deniable")[https://eprint.iacr.org/2021/616]. Implementation instantiates a protocol with several Round 3 candidates (finalists and alternates) to the NIST post-quantum standardization process. Benchmarking tool can be use to compare the resulting bandwidth and computation costs.
 
 ## Building
 
