@@ -30,7 +30,7 @@ void BenchScheme(benchmark::State &st) {
         if(!label_st) {
             ost << "\tData transer: ["
                 << "lpk: " << get_received_init_data_len(&session)
-                << "\tek_t: " << get_session_sent_data_len(&session)
+                << "\tek_t,sign_A: " << get_session_sent_data_len(&session)
                 << "\tC,C_T,c: " << get_session_received_data_len(&session)
                 << "\ttotal: " << get_session_sent_data_len(&session) +
                 get_session_received_data_len(&session) +

@@ -75,12 +75,14 @@ typedef struct comm_ctx_t {
 
 	struct {
 		buf_t init_kem_pub_key;
+		buf_t init_sig_pub_key;
 		buf_t resp_sig_pub_key;
 	} setup;
 
 	struct {
 		// sender
 		buf_t pub_key_eph;
+		buf_t sign_A;	// Sigma A
 		// recipient
 		buf_t ct_st;    // KEM ciphertext
 		buf_t ct_eph;   // wKEM ciphertext

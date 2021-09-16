@@ -246,8 +246,10 @@ void init_session(comm_ctx_t *c, part_t p[2]) {
 
     // Init all the memory used
     buf_init(&c->setup.init_kem_pub_key, c->params->kem_pub_sz);
+    buf_init(&c->setup.init_sig_pub_key, c->params->sig_pub_sz);
     buf_init(&c->setup.resp_sig_pub_key, c->params->sig_pub_sz);
     buf_init(&c->session.pub_key_eph, c->params->kem_pub_sz);
+    buf_init(&c->session.sign_A, c->params->sig_sz);
     buf_init(&c->session.ct_st, c->params->kem_ct_sz);
     buf_init(&c->session.ct_eph, c->params->kem_ct_sz);
     buf_init(&c->session.sign, c->params->sig_sz);
@@ -256,7 +258,7 @@ void init_session(comm_ctx_t *c, part_t p[2]) {
     buf_init(&c->w.ss_st, c->params->kem_ss_sz);
     buf_init(&c->w.ss_eph, c->params->kem_ss_sz);
 
-    // Calculate session ID prefix: P_i||P_j||lpk_i||lpk_j
+    // Concatenate initial part of session ID: P_i||P_j||lpk_i||lpk_j
     uint8_t *psid = c->session.sid_pfx.p;
     memcpy(psid, p[0].ident, ASZ(p[0].ident));
     psid += ASZ(p[0].ident);
@@ -335,7 +337,15 @@ bool offer(comm_ctx_t *c, /*const*/part_t *p) {
         pqc_keygen(c->kem_ctx,
             c->session.pub_key_eph.p,
             p->kem_eph_prv_key.p));
-    return !!copy_buf(&c->setup.init_kem_pub_key, &p->kp.pub_key);;
+    // Create sigma A, by signing public, ephmeral key ekT key and store sign in the session
+    CHECK_PQC(
+        pqc_sig_create(c->sig_ctx,
+            c->session.sign_A.p, &c->session.sign_A.sz,
+            c->session.pub_key_eph.p, c->session.pub_key_eph.sz,
+            p->kp_sig.prv_key.p));
+    return
+        copy_buf(&c->setup.init_sig_pub_key, &p->kp_sig.pub_key) &&
+        copy_buf(&c->setup.init_kem_pub_key, &p->kp.pub_key);
 err:
     return false;
 }
@@ -345,6 +355,13 @@ bool accept(uint8_t *session_key, comm_ctx_t *c, const part_t *p) {
     buf_t *ss_eph = &c->w.ss_eph;
     buf_t *sid = &c->w.sid;
     uint8_t concat_sess_key[MAX_KJKH_LEN] = {0};
+
+    // Verify sigma A
+    CHECK_PQC(
+        pqc_sig_verify(c->sig_ctx,
+            c->session.sign_A.p, c->session.sign_A.sz,
+            c->session.pub_key_eph.p, c->session.pub_key_eph.sz,
+            c->setup.init_sig_pub_key.p));
 
     CHECK_PQC(
         pqc_kem_encapsulate(c->kem_ctx,
@@ -424,8 +441,10 @@ err:
 
 void clean_session(comm_ctx_t *c) {
     buf_free(&c->setup.init_kem_pub_key);
+    buf_free(&c->setup.init_sig_pub_key);
     buf_free(&c->setup.resp_sig_pub_key);
     buf_free(&c->session.pub_key_eph);
+    buf_free(&c->session.sign_A);
     buf_free(&c->session.ct_st);
     buf_free(&c->session.ct_eph);
     buf_free(&c->session.sign);
@@ -440,7 +459,7 @@ size_t get_received_init_data_len(const comm_ctx_t *c) {
 }
 
 size_t get_session_sent_data_len(const comm_ctx_t *c) {
-    return c->session.pub_key_eph.sz;
+    return c->session.pub_key_eph.sz + c->session.sign_A.sz;
 }
 
 size_t get_session_received_data_len(const comm_ctx_t *c) {
