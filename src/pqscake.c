@@ -168,7 +168,7 @@ static void prf(uint8_t *out, size_t outsz,
     int hash = find_hash("sha256");
     hmac_state *hmac;
     int err;
-    uint8_t sep[1] = {d};
+    uint8_t sep[kResp] = {d};
 
     hmac = XMALLOC(sizeof(hmac_state));
     if(!hmac) abort();
@@ -194,49 +194,49 @@ bool init_party(struct part_t *p, uint8_t role, uint8_t alg_id) {
     const pqc_ctx_t *kem_ctx = pqc_kem_alg_by_id(algs[alg_id].kem_id);
     const pqc_ctx_t *sig_ctx = pqc_sig_alg_by_id(algs[alg_id].sig_id);
     buf_init(&p->kem_eph_prv_key, algs[alg_id].kem_prv_sz);
-    buf_init(&p->kp.pub_key, algs[alg_id].kem_pub_sz);
-    buf_init(&p->kp.prv_key, algs[alg_id].kem_prv_sz);
-    buf_init(&p->kp_sig.pub_key, algs[alg_id].sig_pub_sz);
-    buf_init(&p->kp_sig.prv_key, algs[alg_id].sig_prv_sz);
+    buf_init(&p->kem_keypair_static.pub_key, algs[alg_id].kem_pub_sz);
+    buf_init(&p->kem_keypair_static.prv_key, algs[alg_id].kem_prv_sz);
+    buf_init(&p->sig_keypair.pub_key, algs[alg_id].sig_pub_sz);
+    buf_init(&p->sig_keypair.prv_key, algs[alg_id].sig_prv_sz);
 
     // generate long term signing and kem key
     CHECK_PQC(
         pqc_keygen(sig_ctx,
-            p->kp_sig.pub_key.p,
-            p->kp_sig.prv_key.p));
+            p->sig_keypair.pub_key.p,
+            p->sig_keypair.prv_key.p));
     CHECK_PQC(
         pqc_keygen(kem_ctx,
-            p->kp.pub_key.p, p->kp.prv_key.p));
+            p->kem_keypair_static.pub_key.p, p->kem_keypair_static.prv_key.p));
     p->role = role;
     p->alg_id = alg_id;
 
     RAND_bytes(tmp, ASZ(tmp));
-    ext_s(p->ident, IDENT_LEN, tmp, &p->kp.prv_key);
+    ext_s(p->ident, IDENT_LEN, tmp, &p->kem_keypair_static.prv_key);
     ret = true;
 
 err:
     if (!ret) {
         buf_free(&p->kem_eph_prv_key);
-        buf_free(&p->kp.pub_key);
-        buf_free(&p->kp.prv_key);
-        buf_free(&p->kp_sig.pub_key);
-        buf_free(&p->kp_sig.prv_key);
+        buf_free(&p->kem_keypair_static.pub_key);
+        buf_free(&p->kem_keypair_static.prv_key);
+        buf_free(&p->sig_keypair.pub_key);
+        buf_free(&p->sig_keypair.prv_key);
     }
     return ret;
 }
 
 void clean_party(part_t *p) {
     buf_free(&p->kem_eph_prv_key);
-    buf_free(&p->kp.pub_key);
-    buf_free(&p->kp.prv_key);
-    buf_free(&p->kp_sig.pub_key);
-    buf_free(&p->kp_sig.prv_key);
+    buf_free(&p->kem_keypair_static.pub_key);
+    buf_free(&p->kem_keypair_static.prv_key);
+    buf_free(&p->sig_keypair.pub_key);
+    buf_free(&p->sig_keypair.prv_key);
 }
 
 void init_session(comm_ctx_t *c, part_t p[2]) {
-    assert(p[0].alg_id == p[1].alg_id);
+    assert(p[kInit].alg_id == p[kResp].alg_id);
 
-    c->params = &algs[p[0].alg_id];
+    c->params = &algs[p[kInit].alg_id];
     c->kem_ctx = pqc_kem_alg_by_id(c->params->kem_id);
     c->sig_ctx = pqc_sig_alg_by_id(c->params->sig_id);
     RAND_bytes(c->seed, ASZ(c->seed));
@@ -245,37 +245,37 @@ void init_session(comm_ctx_t *c, part_t p[2]) {
     assert(c->sig_ctx);
 
     // Init all the memory used
-    buf_init(&c->setup.init_kem_pub_key, c->params->kem_pub_sz);
-    buf_init(&c->setup.init_sig_pub_key, c->params->sig_pub_sz);
-    buf_init(&c->setup.resp_sig_pub_key, c->params->sig_pub_sz);
-    buf_init(&c->session.pub_key_eph, c->params->kem_pub_sz);
-    buf_init(&c->session.sign_A, c->params->sig_sz);
-    buf_init(&c->session.ct_st, c->params->kem_ct_sz);
-    buf_init(&c->session.ct_eph, c->params->kem_ct_sz);
-    buf_init(&c->session.sign, c->params->sig_sz);
-    buf_init(&c->session.sid_pfx, c->params->sid_pfx_sz);
+    buf_init(&c->sid_pfx, c->params->sid_pfx_sz);
+    buf_init(&c->i.kem_static, c->params->kem_pub_sz);
+    buf_init(&c->i.sig, c->params->sig_pub_sz);
+    buf_init(&c->i.kem_eph, c->params->sig_pub_sz);
+    buf_init(&c->r.pub_key_eph, c->params->kem_pub_sz);
+    buf_init(&c->i.sign_A, c->params->sig_sz);
+    buf_init(&c->r.ct_st, c->params->kem_ct_sz);
+    buf_init(&c->r.ct_eph, c->params->kem_ct_sz);
+    buf_init(&c->r.sign, c->params->sig_sz);
     buf_init(&c->w.sid, c->params->sid_sz);
     buf_init(&c->w.ss_st, c->params->kem_ss_sz);
     buf_init(&c->w.ss_eph, c->params->kem_ss_sz);
 
     // Concatenate initial part of session ID: P_i||P_j||lpk_i||lpk_j
-    uint8_t *psid = c->session.sid_pfx.p;
-    memcpy(psid, p[0].ident, ASZ(p[0].ident));
-    psid += ASZ(p[0].ident);
-    memcpy(psid, p[1].ident, ASZ(p[1].ident));
-    psid += ASZ(p[1].ident);
+    uint8_t *psid = c->sid_pfx.p;
+    memcpy(psid, p[kInit].ident, ASZ(p[kInit].ident));
+    psid += ASZ(p[kInit].ident);
+    memcpy(psid, p[kResp].ident, ASZ(p[kResp].ident));
+    psid += ASZ(p[kResp].ident);
 
     // lpk_i
-    copy_from_buf(psid, p[0].kp.pub_key.sz, &p[0].kp.pub_key);
-    psid += p[0].kp.pub_key.sz;
+    copy_from_buf(psid, p[kInit].kem_keypair_static.pub_key.sz, &p[kInit].kem_keypair_static.pub_key);
+    psid += p[kInit].kem_keypair_static.pub_key.sz;
 
-    copy_from_buf(psid, p[0].kp_sig.pub_key.sz, &p[0].kp_sig.pub_key);
-    psid += p[0].kp_sig.pub_key.sz;
+    copy_from_buf(psid, p[kInit].sig_keypair.pub_key.sz, &p[kInit].sig_keypair.pub_key);
+    psid += p[kInit].sig_keypair.pub_key.sz;
 
     // lpk_j
-    copy_from_buf(psid, p[1].kp.pub_key.sz, &p[1].kp.pub_key);
-    psid += p[1].kp.pub_key.sz;
-    copy_from_buf(psid, p[1].kp_sig.pub_key.sz, &p[1].kp_sig.pub_key);
+    copy_from_buf(psid, p[kResp].kem_keypair_static.pub_key.sz, &p[kResp].kem_keypair_static.pub_key);
+    psid += p[kResp].kem_keypair_static.pub_key.sz;
+    copy_from_buf(psid, p[kResp].sig_keypair.pub_key.sz, &p[kResp].sig_keypair.pub_key);
 }
 
 static void get_session_key(
@@ -316,36 +316,36 @@ void init_lib() {
 
 static void finish_sid(buf_t *sid, const comm_ctx_t *c) {
     uint8_t *psid = sid->p;
-    copy_from_buf(psid, c->session.sid_pfx.sz, &c->session.sid_pfx);
+    copy_from_buf(psid, c->sid_pfx.sz, &c->sid_pfx);
     psid += c->params->sid_pfx_sz;
 
     // ek_t
-    copy_from_buf(psid, c->session.pub_key_eph.sz, &c->session.pub_key_eph);
-    psid += c->session.pub_key_eph.sz;
+    copy_from_buf(psid, c->r.pub_key_eph.sz, &c->r.pub_key_eph);
+    psid += c->r.pub_key_eph.sz;
 
     // ct
-    copy_from_buf(psid, c->session.ct_st.sz, &c->session.ct_st);
-    psid += c->session.ct_st.sz;
+    copy_from_buf(psid, c->r.ct_st.sz, &c->r.ct_st);
+    psid += c->r.ct_st.sz;
 
     // ct_eph
-    copy_from_buf(psid, c->session.ct_eph.sz, &c->session.ct_eph);
+    copy_from_buf(psid, c->r.ct_eph.sz, &c->r.ct_eph);
 }
 
 bool offer(comm_ctx_t *c, /*const*/part_t *p) {
     // store ephemeral KEM public key in session and keep private key local
     CHECK_PQC(
         pqc_keygen(c->kem_ctx,
-            c->session.pub_key_eph.p,
+            c->r.pub_key_eph.p,
             p->kem_eph_prv_key.p));
     // Create sigma A, by signing public, ephmeral key ekT key and store sign in the session
     CHECK_PQC(
         pqc_sig_create(c->sig_ctx,
-            c->session.sign_A.p, &c->session.sign_A.sz,
-            c->session.pub_key_eph.p, c->session.pub_key_eph.sz,
-            p->kp_sig.prv_key.p));
+            c->i.sign_A.p, &c->i.sign_A.sz,
+            c->r.pub_key_eph.p, c->r.pub_key_eph.sz,
+            p->sig_keypair.prv_key.p));
     return
-        copy_buf(&c->setup.init_sig_pub_key, &p->kp_sig.pub_key) &&
-        copy_buf(&c->setup.init_kem_pub_key, &p->kp.pub_key);
+        copy_buf(&c->i.sig, &p->sig_keypair.pub_key) &&
+        copy_buf(&c->i.kem_static, &p->kem_keypair_static.pub_key);
 err:
     return false;
 }
@@ -359,37 +359,37 @@ bool accept(uint8_t *session_key, comm_ctx_t *c, const part_t *p) {
     // Verify sigma A
     CHECK_PQC(
         pqc_sig_verify(c->sig_ctx,
-            c->session.sign_A.p, c->session.sign_A.sz,
-            c->session.pub_key_eph.p, c->session.pub_key_eph.sz,
-            c->setup.init_sig_pub_key.p));
+            c->i.sign_A.p, c->i.sign_A.sz,
+            c->r.pub_key_eph.p, c->r.pub_key_eph.sz,
+            c->i.sig.p));
 
     CHECK_PQC(
         pqc_kem_encapsulate(c->kem_ctx,
-            c->session.ct_st.p, ss_st->p,
-            c->setup.init_kem_pub_key.p));
+            c->r.ct_st.p, ss_st->p,
+            c->i.kem_static.p));
 
     CHECK_PQC(
         pqc_kem_encapsulate(c->kem_ctx,
-            c->session.ct_eph.p, ss_eph->p,
-            c->session.pub_key_eph.p));
+            c->r.ct_eph.p, ss_eph->p,
+            c->r.pub_key_eph.p));
 
     finish_sid(sid, c);
 
     CHECK_PQC(
         pqc_sig_create(c->sig_ctx,
-            c->session.sign.p, &c->session.sign.sz,
+            c->r.sign.p, &c->r.sign.sz,
             sid->p, sid->sz,
-            p->kp_sig.prv_key.p));
+            p->sig_keypair.prv_key.p));
 
     const size_t sec_len = get_kem_security_bytelen(c->params->nist_level);
     get_session_key(concat_sess_key, c->seed, sid, ss_st, ss_eph, sec_len,
-        c->session.sign.sz);
+        c->r.sign.sz);
 
     // sigma = c XOR kh
-    for (size_t i=0; i<c->session.sign.sz; i++) {
-        c->session.sign.p[i] ^= concat_sess_key[sec_len+i];
+    for (size_t i=0; i<c->r.sign.sz; i++) {
+        c->r.sign.p[i] ^= concat_sess_key[sec_len+i];
     }
-    copy_buf(&c->setup.resp_sig_pub_key, &p->kp_sig.pub_key);
+    copy_buf(&c->i.kem_eph, &p->sig_keypair.pub_key);
 
     // copy-out k_j
     memcpy(session_key, concat_sess_key, sec_len);
@@ -407,29 +407,29 @@ bool finalize(uint8_t *session_key, comm_ctx_t *c, const part_t *p) {
     finish_sid(sid, c);
     CHECK_PQC(
         pqc_kem_decapsulate(c->kem_ctx,
-            ss_st->p, c->session.ct_st.p,
-            p->kp.prv_key.p));
+            ss_st->p, c->r.ct_st.p,
+            p->kem_keypair_static.prv_key.p));
 
     CHECK_PQC(
         pqc_kem_decapsulate(c->kem_ctx,
-            ss_eph->p, c->session.ct_eph.p,
+            ss_eph->p, c->r.ct_eph.p,
             p->kem_eph_prv_key.p));
 
 
     const size_t sec_len = get_kem_security_bytelen(c->params->nist_level);
     get_session_key(concat_sess_key, c->seed, sid, ss_st, ss_eph, sec_len,
-        c->session.sign.sz);
+        c->r.sign.sz);
 
     // sigma = c XOR kh
-    for (size_t i=0; i<c->session.sign.sz; i++) {
-        c->session.sign.p[i] ^= concat_sess_key[sec_len+i];
+    for (size_t i=0; i<c->r.sign.sz; i++) {
+        c->r.sign.p[i] ^= concat_sess_key[sec_len+i];
     }
 
     CHECK_PQC(
         pqc_sig_verify(c->sig_ctx,
-            c->session.sign.p, c->session.sign.sz,
+            c->r.sign.p, c->r.sign.sz,
             sid->p, sid->sz,
-            c->setup.resp_sig_pub_key.p));
+            c->i.kem_eph.p));
 
     // copy-out k_i
     memcpy(session_key, concat_sess_key, sec_len);
@@ -440,15 +440,15 @@ err:
 }
 
 void clean_session(comm_ctx_t *c) {
-    buf_free(&c->setup.init_kem_pub_key);
-    buf_free(&c->setup.init_sig_pub_key);
-    buf_free(&c->setup.resp_sig_pub_key);
-    buf_free(&c->session.pub_key_eph);
-    buf_free(&c->session.sign_A);
-    buf_free(&c->session.ct_st);
-    buf_free(&c->session.ct_eph);
-    buf_free(&c->session.sign);
-    buf_free(&c->session.sid_pfx);
+    buf_free(&c->sid_pfx);
+    buf_free(&c->i.kem_static);
+    buf_free(&c->i.sig);
+    buf_free(&c->i.kem_eph);
+    buf_free(&c->r.pub_key_eph);
+    buf_free(&c->i.sign_A);
+    buf_free(&c->r.ct_st);
+    buf_free(&c->r.ct_eph);
+    buf_free(&c->r.sign);
     buf_free(&c->w.sid);
     buf_free(&c->w.ss_st);
     buf_free(&c->w.ss_eph);
@@ -459,13 +459,13 @@ size_t get_received_init_data_len(const comm_ctx_t *c) {
 }
 
 size_t get_session_sent_data_len(const comm_ctx_t *c) {
-    return c->session.pub_key_eph.sz + c->session.sign_A.sz;
+    return c->r.pub_key_eph.sz + c->i.sign_A.sz;
 }
 
 size_t get_session_received_data_len(const comm_ctx_t *c) {
-    return c->session.ct_st.sz +
-            c->session.ct_eph.sz +
-            c->session.sign.sz;
+    return c->r.ct_st.sz +
+            c->r.ct_eph.sz +
+            c->r.sign.sz;
 }
 
 size_t get_scheme_sec(const comm_ctx_t *c) {
