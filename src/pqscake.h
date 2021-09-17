@@ -35,16 +35,10 @@ typedef struct params_t {
 } params_t;
 
 // Kem keypair
-typedef struct kem_keypair_t {
+typedef struct keypair_t {
 	buf_t pub_key;
 	buf_t prv_key;
-} kem_keypair_t;
-
-// Signature keypair
-typedef struct sig_keypair_t {
-	buf_t pub_key;
-	buf_t prv_key;
-} sig_keypair_t;
+} keypair_t;
 
 // defines a party in the protocol
 enum {kInit, kResp};
@@ -53,8 +47,8 @@ typedef struct part_t {
 	uint8_t role;
 
 	uint8_t ident[IDENT_LEN];
-	struct sig_keypair_t kp_sig;
-	struct kem_keypair_t kp;
+	struct keypair_t kp_sig;
+	struct keypair_t kp;
 	buf_t kem_eph_prv_key;
 } part_t;
 
