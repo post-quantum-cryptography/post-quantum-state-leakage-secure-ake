@@ -164,12 +164,16 @@ void clean_party(part_t *p);
 const params_t *get_alg_params(size_t i);
 // Amount of bytes exchanged during initialization phase (long term signing and KEM key)
 size_t get_received_init_data_len(const comm_ctx_t *c);
-// Amount of bytes sent by initiator (received by reciver)
-size_t get_session_sent_data_len(const comm_ctx_t *c);
-// Amount of bytes received by initiator (sent by reciver)
-size_t get_session_received_data_len(const comm_ctx_t *c);
 // Claimed security level as defined by NIST
 size_t get_scheme_sec(const comm_ctx_t *c);
+// Amount of bytes sent by initiator (received by reciver)
+size_t get_i2s(const comm_ctx_t *c);
+// Amount of bytes received by the receiver
+size_t get_s2r(const comm_ctx_t *c);
+// Amount of bytes sent by the receiver
+size_t get_r2s(const comm_ctx_t *c);
+// Amount of bytes received by initiator (sent by reciver)
+size_t get_s2i(const comm_ctx_t *c);
 #ifdef __cplusplus
 }
 #endif

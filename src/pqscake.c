@@ -454,20 +454,30 @@ void clean_session(comm_ctx_t *c) {
     buf_free(&c->w.ss_eph);
 }
 
-size_t get_received_init_data_len(const comm_ctx_t *c) {
+static inline size_t lpk(const comm_ctx_t *c) {
     return c->params->kem_pub_sz + c->params->sig_pub_sz;
 }
 
-size_t get_session_sent_data_len(const comm_ctx_t *c) {
-    return c->r.pub_key_eph.sz + c->i.sign_A.sz;
-}
-
-size_t get_session_received_data_len(const comm_ctx_t *c) {
-    return c->r.ct_st.sz +
-            c->r.ct_eph.sz +
-            c->r.sign.sz;
+size_t get_received_init_data_len(const comm_ctx_t *c) {
+    return lpk(c);
 }
 
 size_t get_scheme_sec(const comm_ctx_t *c) {
     return c->params->nist_level;
+}
+
+size_t get_i2s(const comm_ctx_t *c) {
+    return c->params->kem_pub_sz + c->params->sig_sz;
+}
+
+size_t get_s2r(const comm_ctx_t *c) {
+    return get_i2s(c) + lpk(c);
+}
+
+size_t get_r2s(const comm_ctx_t *c) {
+    return (2*c->params->kem_ct_sz) + c->params->sig_sz;
+}
+
+size_t get_s2i(const comm_ctx_t *c) {
+    return get_r2s(c) + lpk(c);
 }
