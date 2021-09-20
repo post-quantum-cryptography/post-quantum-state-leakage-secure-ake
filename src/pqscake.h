@@ -174,6 +174,10 @@ size_t get_s2r(const comm_ctx_t *c);
 size_t get_r2s(const comm_ctx_t *c);
 // Amount of bytes received by initiator (sent by reciver)
 size_t get_s2i(const comm_ctx_t *c);
+// Amount of data statically stored at the server per single user
+size_t get_static_data_size(const comm_ctx_t *c);
+// Amount of used during session establishement per single user-to-user
+size_t get_session_est_data_size(const comm_ctx_t *c);
 #ifdef __cplusplus
 }
 #endif

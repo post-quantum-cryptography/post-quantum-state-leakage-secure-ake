@@ -481,3 +481,11 @@ size_t get_r2s(const comm_ctx_t *c) {
 size_t get_s2i(const comm_ctx_t *c) {
     return get_r2s(c) + lpk(c);
 }
+
+size_t get_static_data_size(const comm_ctx_t *c) {
+    return lpk(c) + c->params->kem_pub_sz + c->params->sig_sz;
+}
+
+size_t get_session_est_data_size(const comm_ctx_t *c) {
+    return get_r2s(c);
+}
