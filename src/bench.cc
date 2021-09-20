@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <utility>
 #include <sstream>
+#include <iomanip>      // std::setw
 
 #include <benchmark/../../src/statistics.h>
 #include <benchmark/../../src/cycleclock.h>
@@ -11,6 +12,14 @@
 #include "utils.h"
 
 extern const size_t alg_num;
+
+static size_t total_data(struct comm_ctx_t *c) {
+    return
+        get_i2s(c) +
+        get_s2r(c) +
+        get_r2s(c) +
+        get_s2i(c);
+}
 
 void BenchScheme(benchmark::State &st) {
     size_t total=0, t;
@@ -22,31 +31,31 @@ void BenchScheme(benchmark::State &st) {
     uint8_t session_key_resp[MAX_SEC_BYTE_LEN] = {0},
             session_key_init[MAX_SEC_BYTE_LEN] = {0};
     for (auto _ : st) {
-        comm_ctx_t session = {0};
+        comm_ctx_t ctx = {0};
         init_party(&parts[0], kInit, alg_id);
         init_party(&parts[1], kResp, alg_id);
-        init_session(&session, parts);
+        init_session(&ctx, parts);
 
         if(!label_st) {
             ost << "\tData transer: ["
-                << "lpk: " << get_received_init_data_len(&session)
-                << "\tek_t: " << get_session_sent_data_len(&session)
-                << "\tC,C_T,c: " << get_session_received_data_len(&session)
-                << "\ttotal: " << get_session_sent_data_len(&session) +
-                get_session_received_data_len(&session) +
-                (2*get_received_init_data_len(&session)) << "],"
-                << "\tNIST-LVL: " << get_scheme_sec(&session);
+                << "lpk: "   << std::setw(8) << get_received_init_data_len(&ctx)
+                << " I->S: " << std::setw(8) << get_i2s(&ctx)
+                << " S->R: " << std::setw(8) << get_s2r(&ctx)
+                << " R->S: " << std::setw(8) << get_r2s(&ctx)
+                << " S->I: " << std::setw(8) << get_s2i(&ctx)
+                << " total data: " << std::setw(8) << total_data(&ctx)
+                << " NIST-LVL: " << std::setw(8) << get_scheme_sec(&ctx);
             st.SetLabel(ost.str());
             label_st = true;
         }
 
         t = benchmark::cycleclock::Now();
-        offer(&session, &parts[0]);
-        accept(session_key_resp, &session, &parts[1]);
-        finalize(session_key_init, &session, &parts[0]);
+        offer(&ctx, &parts[0]);
+        accept(session_key_resp, &ctx, &parts[1]);
+        finalize(session_key_init, &ctx, &parts[0]);
         total += benchmark::cycleclock::Now() - t;
 
-        clean_session(&session);
+        clean_session(&ctx);
         clean_party(&parts[0]);
         clean_party(&parts[1]);
     }
