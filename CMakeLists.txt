@@ -10,6 +10,14 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+if(USE_ASM)
+	set(PQC_CMAKE_ARGS "PQC_NO_ASM=0")
+	set(LD_MATH_LIB "")
+else()
+	set(PQC_CMAKE_ARGS "PQC_NO_ASM=1")
+	set(LD_MATH_LIB m)
+endif()
+
 FetchContent_Declare(
   benchmark
   SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/benchmark
@@ -65,8 +73,8 @@ ExternalProject_Add(LibTomCrypt
 ExternalProject_Add(LibPQC
     SOURCE_DIR ${PQC_ROOT}
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libpqc-build
-    CMAKE_ARGS PQC_NO_ASM=1
-	INSTALL_COMMAND "")
+    CMAKE_ARGS ${PQC_CMAKE_ARGS}
+    INSTALL_COMMAND "")
 
 include_directories(
 	${LIBTOMCRYPT_ROOT}/src/headers
@@ -93,7 +101,8 @@ target_link_libraries(
 	${CMAKE_CURRENT_BINARY_DIR}/libtomcrypt-build/libtomcrypt/libtomcrypt.a
 	${CMAKE_CURRENT_BINARY_DIR}/libpqc-build/libpqc_s.a
 	${CMAKE_CURRENT_BINARY_DIR}/libpqc-build/3rd/cpu_features/libcpu_features.a
-	OpenSSL::Crypto)
+	OpenSSL::Crypto
+	${LD_MATH_LIB})
 
 target_link_libraries(
 	sneik_test
@@ -113,7 +122,8 @@ add_dependencies(
 target_link_libraries(
 	sneik_bench
 	sneik
-	benchmark::benchmark)
+	benchmark::benchmark
+	${LD_MATH_LIB})
 
 target_include_directories(
 	sneik_bench
