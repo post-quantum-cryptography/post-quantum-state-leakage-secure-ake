@@ -30,7 +30,7 @@ FetchContent_Declare(
   pqc
   SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/pqc
   GIT_REPOSITORY https://github.com/kriskwiatkowski/pqc.git
-  GIT_TAG        e96e7aaea8340ed2916390c53ac282eca4a088b4
+  GIT_TAG        388eaa5b76963df2137f941c5b1a8606049a3801
 )
 FetchContent_Populate(pqc)
 
@@ -65,6 +65,7 @@ ExternalProject_Add(LibTomCrypt
 ExternalProject_Add(LibPQC
     SOURCE_DIR ${PQC_ROOT}
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libpqc-build
+    CMAKE_ARGS PQC_NO_ASM=1
 	INSTALL_COMMAND "")
 
 include_directories(
