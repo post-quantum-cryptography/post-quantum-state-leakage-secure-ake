@@ -22,7 +22,7 @@ FetchContent_Declare(
   benchmark
   SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/benchmark
   GIT_REPOSITORY https://github.com/kriskwiatkowski/benchmark.git
-  GIT_TAG        49862ab56b6b7c3afd87b80bd5d787ed78ce3b96
+  GIT_TAG        hdc/release_crypto_2
 )
 FetchContent_Populate(benchmark)
 
@@ -38,7 +38,7 @@ FetchContent_Declare(
   pqc
   SOURCE_DIR     ${PROJECT_SOURCE_DIR}/3rd/pqc
   GIT_REPOSITORY https://github.com/kriskwiatkowski/pqc.git
-  GIT_TAG        649f32d1f4ee8e19215d8d0d9092c8f447ba3946
+  GIT_TAG        x3dh_paper_v1.0.0
 )
 FetchContent_Populate(pqc)
 
